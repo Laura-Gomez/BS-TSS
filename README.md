@@ -4,7 +4,7 @@
 
 ### INPUT
 
-For each input file, a list of columns is provided. All columns must exist. When the information is no available NA is allowed. The mandatory fields per input field are shown in bold letters
+For each input file, a list of columns is provided. All columns must exist. When the information is no available NA is allowed. The mandatory fields are shown in bold letters
 
 **Binding sites from RegulonDB** [regulon.bs]
  - TF ID
@@ -84,10 +84,12 @@ This code was written using Gisella Storz data
  - evidence
 
 
-### OUTPUT
+## OUTPUT
+
 Each BS is associated with one gene, and each gene is assigned to the category of activated or repressed
 
-## OUTPUT FILES 
+### OUTPUT FILES 
+
  - Histograms of the distance between the known BSs for a specific TF and the known TSS´s associated to those site
  - TSS.activated.all: Number of possible TSS-BS interactions for all BSs associated to activated genes. For regulon TSSs
  - TSS.activated.pass: Number of TSS-BS interactions that pass the distance filter for all BSs associated to activated genes. For Regulon TSSs
