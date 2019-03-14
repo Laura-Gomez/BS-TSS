@@ -91,28 +91,28 @@ Each BS is associated with one gene, and each gene is assigned to the category o
 ### OUTPUT FILES 
 
  - Histograms of the distance between the known BSs for a specific TF and the known TSS´s associated to those site
- - TSS.activated.all: Number of possible TSS-BS interactions for all BSs associated to activated genes. For regulon TSSs
- - TSS.activated.pass: Number of TSS-BS interactions that pass the distance filter for all BSs associated to activated genes. For Regulon TSSs
- - TSS.repressed.all: Same as TSS.activated.all. BSs associated to repressed genes
- - TSS.repressed.pass: Same as TSS.activated.pass. BSs associated to repressed genes
- - HT-TSS.activated.all: Same as TSS.activated.all. TSSs taken from HT experiment.
- - HT-TSS.activated.pass: Same as TSS.activated.pass. TSSs taken from HT experiment.
- - HT-TSS.repressed.all: Same as TSS.repressed.all. TSSs taken from HT experiment.
- - HT-TSS.repressed.pass: Same as TSS.repressed.pass. TSSs taken from HT experiment.
+ - *TSS.activated.all*: Number of possible TSS-BS interactions for all BSs associated to activated genes. For regulon TSSs
+ - *TSS.activated.pass*: Number of TSS-BS interactions that pass the distance filter for all BSs associated to activated genes. For Regulon TSSs
+ - *TSS.repressed.all*: Same as TSS.activated.all. BSs associated to repressed genes
+ - *TSS.repressed.pass*: Same as TSS.activated.pass. BSs associated to repressed genes
+ - *HT-TSS.activated.all*: Same as TSS.activated.all. TSSs taken from HT experiment.
+ - *HT-TSS.activated.pass*: Same as TSS.activated.pass. TSSs taken from HT experiment.
+ - *HT-TSS.repressed.all*: Same as TSS.repressed.all. TSSs taken from HT experiment.
+ - *HT-TSS.repressed.pass*: Same as TSS.repressed.pass. TSSs taken from HT experiment.
 	
 ### OUTPUT DIRECTORIES
 Each output directory containd two directories: Activated and Repressed:
 
- - Activated: Contains all TSS-BS distances for all genes classifies as Activated in the expression data
- - Repressed:  Contains all TSS-BS distances for all genes classifies as Repressed in the expression data
+ - *Activated*: Contains all TSS-BS distances for all genes classifies as Activated in the expression data
+ - *Repressed*:  Contains all TSS-BS distances for all genes classifies as Repressed in the expression data
  
 Each subdirectory contains one file per gene. In these files, each columns represents a BS and each row represents a TSS.
 
 The output directories are:
- - TSS: All distances from BSs to known TSSs (regulon TSSs)
- - TSS-PASS: Distances that passed the distance filter (regulon TSSs)
- - HT-TSS: All distances from BSs to HT TSSs (eg, Storsz TSSs)
- - HT-TSS-PASS: Distances that passed the distance filter (eg, Storsz TSSs)
+ - *TSS*: All distances from BSs to known TSSs (regulon TSSs)
+ - *TSS-PASS*: Distances that passed the distance filter (regulon TSSs)
+ - *HT-TSS*: All distances from BSs to HT TSSs (eg, Storsz TSSs)
+ - *HT-TSS-PASS*: Distances that passed the distance filter (eg, Storsz TSSs)
  
  
 ### RUN
