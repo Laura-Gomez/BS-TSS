@@ -84,7 +84,7 @@ This code was written using Gisella Storz data
  - evidence
 
 
-## OUTPUT
+## OUTPUT
 
 Each BS is associated with one gene, and each gene is assigned to the category of activated or repressed
 
@@ -100,7 +100,21 @@ Each BS is associated with one gene, and each gene is assigned to the category o
  - HT-TSS.repressed.all: Same as TSS.repressed.all. TSSs taken from HT experiment.
  - HT-TSS.repressed.pass: Same as TSS.repressed.pass. TSSs taken from HT experiment.
 	
+### OUTPUT DIRECTORIES
+Each output directory containd two directories: Activated and Repressed:
 
+ - Activated: Contains all TSS-BS distances for all genes classifies as Activated in the expression data
+ - Repressed:  Contains all TSS-BS distances for all genes classifies as Repressed in the expression data
+ 
+Each subdirectory contains one file per gene. In these files, each columns represents a BS and each row represents a TSS.
+
+The output directories are:
+ - TSS: All distances from BSs to known TSSs (regulon TSSs)
+ - TSS-PASS: Distances that passed the distance filter (regulon TSSs)
+ - HT-TSS: All distances from BSs to HT TSSs (eg, Storsz TSSs)
+ - HT-TSS-PASS: Distances that passed the distance filter (eg, Storsz TSSs)
+ 
+ 
 ### RUN
 
  Rscript --vanilla Distance_TSS_BS.R regulon.bs TF expression.data peaks.data regulon.tss ht.tss Example-Data/INPUT
