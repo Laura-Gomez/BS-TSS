@@ -1,0 +1,482 @@
+---
+title: "BS_TSS_Distance_OmpR_v1.0"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+
+```{r, echo=TRUE, message=F}
+
+## SET WORKING DIRECTORY
+setwd("/Users/laura/Documents/PGC/BS-TSS-distances/")
+
+```
+
+## OmpR DATA
+### REGULON-DB
+
+```{r echo=TRUE}
+bs.rdb <- read.table("Example-Data/INPUT/BindingSiteSet.txt", header=F, sep="\t", stringsAsFactors = F)
+names(bs.rdb) <- c("TF.ID", "TF", "TFBS.ID", "TF.LEFT", "TF.RIGTH", "TFBS.SATRND", "TF.GENE.ID", "TU", "EFFECT", "PROMOTER", "DIST.TSS", "SEQ", "EVIDENCE", "EVIDENCE.LEVEL")
+
+bs.ompr <- subset(bs.rdb, TF == "OmpR")
+dim(bs.ompr)
+```
+
+#### Distance from TFBS to TSS
+
+*ALL TFBS*  
+
+```{r echo=TRUE, fig.height=5, fig.width=15}
+{hist(bs.ompr$DIST.TSS, breaks = seq(-450, 150, by = 100), main = "",
+     xlab = "", ylab = "", col = "gold", cex.axis=2, cex.lab = 3, xaxt="n")
+axis(1, at=seq(-400, 100, by = 100), labels=seq(-400, 100, by = 100), cex.axis=2, las = 2)}
+```
+
+*ONLY STRONG TFBS*
+
+```{r echo=TRUE, fig.height=5, fig.width=15}
+bs.ompr.strong <- subset(bs.ompr, EVIDENCE.LEVEL == "Strong")
+dim(bs.ompr.strong)
+{hist(bs.ompr.strong$DIST.TSS, breaks = seq(-450, 150, by = 100), main = "Distribution of distance from ompr-TFBS to TSS\nStrong Evidence",
+     xlab = "Distance", ylab = "Number of TFBS", col = "Maroon", cex.axis = 0.8, las = 2, xaxt="n")
+axis(1, at=seq(-400, 100, by = 100), labels=seq(-400, 100, by = 100), cex=0.8, las = 2)}
+```
+
+*ONLY ACTIVATOR TFBS, ALL EVIDENCE*
+```{r echo=TRUE, fig.height=5, fig.width=15}
+bs.ompr.activator <- subset(bs.ompr, EFFECT == "+")
+dim(bs.ompr.activator)
+{hist(bs.ompr.activator$DIST.TSS, breaks = seq(-450, 150, by = 100), main = "Distribution of distance from ompr-TFBS to TSS\nActivator-All Evidence",
+     xlab = "Distance", ylab = "Number of TFBS", col = "ForestGreen", cex.axis = 0.8, las = 2, xaxt="n")
+axis(1, at=seq(-400, 100, by = 100), labels=seq(-400, 100, by = 100), cex=0.8, las = 2)}
+```
+
+*ONLY REPRESSOR TFBS, ALL EVIDENCE*
+```{r echo=TRUE, fig.height=5, fig.width=15}
+bs.ompr.repressor <- subset(bs.ompr, EFFECT == "-")
+dim(bs.ompr.repressor)
+{hist(bs.ompr.repressor$DIST.TSS, breaks = seq(-450, 150, by = 100), main = "Distribution of distance from ompr-TFBS to TSS\nRepressor-All  Evidence",
+     xlab = "Distance", ylab = "Number of TFBS", col = "Maroon", cex.axis = 0.8, las = 2, xaxt="n")
+axis(1, at=seq(-400, 100, by = 100), labels=seq(-400, 100, by = 100), cex=0.8, las = 2)}
+```
+
+*HOW MANY BS ARE AT DISTANCE X OR LOWER*
+ 
+*ACTIVATORS*
+
+```{r echo=TRUE, fig.height=5, fig.width=10}
+quantile(bs.ompr.activator$DIST.TSS, probs = seq(0, 1, 0.1))
+```
+
+*80% of the activator BS's are at a distance between -186.5 and -47.5*  
+
+*REPRESSORS*
+
+```{r echo=TRUE, fig.height=5, fig.width=10}
+quantile(bs.ompr.repressor$DIST.TSS, probs = seq(0, 1, 0.1), na.rm = TRUE)
+```
+
+*80% of the repressor BS's are at a distance between -149.5 and +69.5*  
+
+### GALAGAN CHIP-SEQ EXPERIMENTS. ompr DATA
+
+#### PEAKS IN REGULON-DB
+
+FILE: ../Data/OmpR-Galagan/OmpR-Known.csv
+DOWNLADED FROM: OmpR EXPERIMENTS, Known Transcription Factor Binding Sites for ompr (By Position)
+
+```{r echo=TRUE}
+known.galagan <- read.csv("Example-Data/INPUT/OmpR-Known.csv", header=F, stringsAsFactors = F)
+names(known.galagan) <- c("Peak.Found", "ID1", "TF", "ID2", "Left.End", "Right.End", "Center", "Strand", "ID3", "Transcription.Unit", "Effect", "Promoter", "Promoter.Position","Promoter.Seq", "Evidence", "EvidenceType", "NA")
+dim(known.galagan)
+```
+
+Plot only those with a known distance to TSS
+```{r echo=TRUE}
+known.galagan <- subset(known.galagan, !is.na(Promoter.Position))
+dim(known.galagan)
+```
+
+*Distribution of TFBS to TSS*  
+
+```{r echo=TRUE, fig.height=5, fig.width=15}
+{ hist(known.galagan$Promoter.Position[known.galagan$Peak.Found > 0], breaks = seq(-450, 150, by = 100),
+     #main = "Distribution of distance from TFBS to TSS\nGalagan Known TFBS OmpR",
+     main = "",
+     xlab = "", ylab = "Number of TFBS", col = "Navy", cex.axis = 2, las = 2, xaxt="n")
+axis(1, at=seq(-400, 100, by = 100), labels=seq(-400, 100, by = 100), cex.axis=2, las =2) }
+```
+
+*Classify by effect each BS (ALL TFBS)*
+
+```{r echo=TRUE, fig.height=5, fig.width=10}
+ggplot(known.galagan,aes(x=Promoter.Position,fill=Effect))+geom_histogram(position="stack", binwidth = 100) 
+```
+
+
+### APPLICATIONS 
+
+ + Identify most probable BSs based on the distance TSS-BS for genes with known TSS
+ + Identify most probable sets BS-TSSs for genes with unknown TSS
+ 
+
+#### Identify most probable BSs based on the distance TSS-BS for genes with known TSS
+
+##### Read information for all CHIP-SEQ Peaks with RNA-SEQ Data. OmpR DATA
+
+These information associates an Effect with a Target Gene.   
+
+TABLE: RNA-Seq Data for Peak Targets  
+
+```{r echo=TRUE}
+peak <- read.csv("Example-Data/INPUT/OmpR-RNASeq-PeakTargets.csv", header=F, stringsAsFactors = F)
+names(peak) <- c("Run", "Sample", "TF", "Target", "LogFoldFPKM",  "LogFoldTPM",	"FPKM",	"Counts","WildTypeFPKM","WildTypeTPM","WTCounts")
+
+peak$effect[peak$LogFoldFPKM > 0] <- "+"
+peak$effect[peak$LogFoldFPKM < 0] <- "-"
+
+```
+
+##### Read information for all ChIP-Seq Peaks
+
+These information associates a Target Gene with a set of BSs.  
+
+FILE: ../Data/OmpR-Galagan/OmpR-All.csv 
+DOWNLADED FROM: OmpR EXPERIMENTS,ChipSeq Transcription Factor Binding Sites and Interactions for OmpR  
+
+```{r echo=TRUE}
+all <- read.csv("Example-Data/INPUT/OmpR-All.csv", header=F, stringsAsFactors = F)
+names(all) <- c("Exp", "sample", "TF", "type", "ID1", "Start", "Stop", "PeakPos", "Height", "No1", "No2", "Shift", "Bnumber", "Gene","Dist")
+```
+
+##### Read TSS information (RegulonDB)
+
+These information associates a TSS with a gene.  
+
+FILE TSS: ../Data/pm_w_first_transc_g__w_ids_noHT.txt  
+Provided by Hely:   pm_w_first_transc_g__w_ids.txt
+**grep -v "TSS_" pm_w_first_transc_g__w_ids.txt > pm_w_first_transc_g__w_ids_noHT.txt**
+
+```{r echo=TRUE}
+tss <- read.table("Example-Data/INPUT/pm_w_first_transc_g__w_ids_noHT.txt", header=F, stringsAsFactors = F, sep = "\t")
+names(tss) <- c("ID", "Promoter.Name", "TSS", "Sigma", "Strand", "GI", "Gene", "PosLeft", "PosRigth", "Evidence", "Bnumber", "PromSeq", "DistPromGene" )
+tss <- subset(tss, !is.na(TSS) )
+```
+
+##### Calculate distance TSS-BS
+
+For every gene (separate activated or repressed genes):
+
+Calculate number of TSSs per gene
+```{r echo=TRUE}
+gene.repressed <- peak$Target[which(peak$effect == "-")]
+gene.activated <- peak$Target[which(peak$effect == "+")]
+
+length(gene.repressed)
+length(gene.activated)
+
+no.tss.repressed <- sapply(gene.repressed, function(x,tss){ nrow(subset(tss, Gene == x))}, tss = tss, simplify = T)
+no.tss.activated <- sapply(gene.activated, function(x,tss){ nrow(subset(tss, Gene == x))}, tss = tss, simplify = T)
+
+```
+
+For all genes with at least one associated TSS:  
+  * Look all BS ChIP-Seq associated with that gene
+  * Calculate distance between each BS and each TSS
+    
+```{r echo=TRUE}
+calculate_distance <- function(x, tss, bs){
+  bs.gene <- subset(bs, Gene == x)
+  tss.gene <- subset(tss, Gene == x)
+  if (nrow(tss.gene) > 0){
+    distance.all <- sapply(bs.gene$PeakPos, function(x,tss){
+    if (tss.gene$Strand[1] == "forward"){
+      distance <- tss.gene$TSS - x  
+    }else{
+      distance <- x - tss.gene$TSS 
+    }
+    distance
+    } ,simplify = T, tss = tss)
+  }else{
+    return (NA)
+  }
+}
+
+TSS.activated <- sapply(gene.activated[no.tss.activated > 0], calculate_distance, tss = tss, bs = all, simplify =T)
+TSS.repressed <- sapply(gene.repressed[no.tss.repressed > 0], calculate_distance, tss = tss, bs = all, simplify =T)
+
+dist.TSS.activated <- unlist(TSS.activated)
+dist.TSS.repressed <- unlist(TSS.repressed)
+
+length(dist.TSS.activated)
+length(dist.TSS.repressed)
+```
+
+Number of 
+Distribution of Distance from TFBS to TSS classified by Effect
+
+```{r echo=TRUE, fig.height=5, fig.width=10}
+dist.TSS <- data.frame(gene = c(names(dist.TSS.activated), names(dist.TSS.repressed)), dist.TSS = c(dist.TSS.activated, dist.TSS.repressed), Effect = c(rep("activated", length(dist.TSS.activated)), rep("repressed", length(dist.TSS.repressed))))
+
+ggplot(dist.TSS,aes(x=dist.TSS,fill=Effect)) +geom_histogram(position="stack", binwidth = 100) + theme(text = element_text(size=20))
+
+
+ggplot(dist.TSS,aes(x=dist.TSS, fill = Effect, col = Effect)) + geom_histogram(alpha = 0.4, position = "identity", binwidth = 100) + scale_fill_manual(values=c("red",  "blue")) + scale_color_manual(values=c("darkred", "darkblue")) + theme(text = element_text(size=30))
+
+```
+
+
+##### Example iraP
+
+TWO TSSs
+```{r echo=TRUE}
+subset(tss, Gene == "iraP")
+```
+
+TWO BINDING SITES
+```{r echo=TRUE}
+subset(all, Gene == "iraP")
+```
+
+DISTANCE BETWEEN EACH BS AND EACH TSS  
+
+  - Una columna para cada BS  
+  - Una fila para cada TSS  
+  
+```{r echo=TRUE}
+TSS.activated[['iraP']]
+```
+
+*80% of the activator BS's are at a distance between -186.5 and -47.5*  
+
+CONCLUSION:  
+THE FIRST BINDING SITE HAS A BETTER CHANCE TO BE FUNCTIONAL THAN THE SECOND ONE  
+THE FIRST BINDING SITE IS PROBABLY RELATED WITH THE FIRST TSS
+
+##### Filter BS-TSS interactions
+
+*Repressed genes*  
+
+Number of ALL TSS-BS interactions
+```{r echo=TRUE}
+sapply(TSS.repressed, function(x){length(as.vector(x))}, simplify=T)
+
+sum(sapply(TSS.repressed, function(x){length(as.vector(x))}, simplify=T))
+
+length(TSS.repressed)
+```
+
+Number of possible TSS-BS interactions (AFTER FILTERING)  
+
+```{r echo=TRUE}
+pass.repressed <- lapply(TSS.repressed, function(x, min, max){ x[x>min & x<max]}, min = -250 , max = 50 )
+
+#pass.repressed <- lapply(TSS.repressed, function(x, min, max){ x[x>min & x<max]}, min = -150 , max = 70 )
+
+no.repressed <- sapply(pass.repressed, length, simplify=T)
+no.repressed
+sum(no.repressed)
+
+```
+
+*Activated genes*  
+
+Number of ALL TSS-BS interactions
+```{r echo=TRUE}
+sapply(TSS.activated, function(x){length(as.vector(x))}, simplify=T)
+sum(sapply(TSS.activated, function(x){length(as.vector(x))}, simplify=T))
+
+length(TSS.activated)
+```
+
+Number of possible TSS-BS interactions (AFTER FILTERING)  
+
+```{r echo=TRUE}
+pass.activated <- lapply(TSS.activated, function(x, min, max){ x[x>min & x<max]}, min = -250 , max = -50 )
+
+#pass.activated <- lapply(TSS.activated, function(x, min, max){ x[x>min & x<max]}, min = -190 , max = -50 )
+
+no.activated <- sapply(pass.activated, length, simplify=T)
+no.activated
+
+sum(no.activated)
+```
+
+#### Identify most probable sets BS-TSSs for genes with unknown TSS
+
+##### Identify genes with no associated TSSs  
+
+Genes with no associated TSS  
+
+```{r echo=TRUE}
+
+activated.noTSS <- names(no.tss.activated[no.tss.activated == 0])
+repressed.noTSS <- names(no.tss.repressed[no.tss.repressed == 0])
+
+length(activated.noTSS)
+activated.noTSS
+
+length(repressed.noTSS)
+repressed.noTSS
+
+```
+
+##### Identify TF Binding Sites associated to those genes  
+
+```{r echo=TRUE}
+activated.noTSS.bs <- subset(all, Gene %in% activated.noTSS)
+repressed.noTSS.bs <- subset(all, Gene %in% repressed.noTSS)
+
+dim(activated.noTSS.bs)
+dim(repressed.noTSS.bs)
+
+```
+
+
+
+##### Look for TSSs (only sense TSSs) in Storz data associated to each of the genes with no associated TSS
+
+* Read Gisella data  
+
+* Subset only sense TSSs
+
+FROM GISELLA STORZ DATA: TSS POSITION (*only sense TSS*)
+FROM JAMES GALAGAN DATA: BINDING SITES POSITIONS, EFFECT OF THE BINDING SITES
+
+FILE:StorzG_TSS_Table_M63_0.4.txt
+
+```{r echo=TRUE}
+M63 <- read.table("Example-Data/INPUT/StorzG_TSS_Table_M63_0.4.txt", stringsAsFactors = F, header=F, sep='\t', quote="")
+names(M63) <- c("TSSPosition", "RPKM", "Promoter", "Strand", "RelPos", "Gene", "Bnumber", "LeftGene", "RigthGene", "Orientation", "TSSClass", "Enrichment", "evidence")
+type.sense <- c("intragenic/sense", "upstream/sense")
+sense <- subset(M63, Orientation %in% type.sense)
+```
+
+* Count the number of possible associated TSSs in Storz data
+
+*Activated genes*  
+
+```{r echo=TRUE}
+tss.no.activated <- sapply(activated.noTSS, function(x,sense){ nrow(subset(sense, Gene == x))}, sense = sense, simplify = T)
+#tss.no.activator
+```
+
+*Repressed genes*  
+
+```{r echo=TRUE}
+tss.no.repressed <- sapply(repressed.noTSS, function(x,sense){ nrow(subset(sense, Gene == x))}, sense = sense, simplify = T)
+#tss.no.repressor
+```
+
+
+For all genes with at least one associated TSS (from Storz data):  
+  * Look all BS ChIP-Seq associated with that gene
+  * Calculate distance between each BS and each TSS
+
+
+```{r echo=TRUE}
+
+TSS_BS_distance<- function(x, tss, bs){
+  bs.gene <- subset(bs, Gene == x)
+  tss.gene <- subset(tss, Gene == x)
+  if (nrow(tss.gene) > 0){
+    distance.all <- sapply(bs.gene$PeakPos, function(x,tss.gene){
+      if (tss.gene$Strand[1] == "-"){
+        distance <- tss.gene$TSSPosition - x  
+      }else{
+        distance <- x - tss.gene$TSSPosition
+      }
+      distance
+    }, tss.gene = tss.gene, simplify=T)
+    return(distance.all)
+  }else{
+    return (NA)
+  }
+}
+
+
+```
+
+```{r echo=TRUE}
+TSS_BS.dist.activated <- sapply(activated.noTSS[tss.no.activated > 0], TSS_BS_distance, tss=sense, bs=all, simplify = T)
+TSS_BS.dist.repressed <- sapply(repressed.noTSS[tss.no.repressed > 0], TSS_BS_distance, tss=sense, bs=all, simplify = T)
+```
+
+##### Example: ydbR
+
+THREE TSSs
+```{r echo=TRUE}
+subset(sense, Gene == "yaaJ")
+```
+
+ONE BINDING SITE
+```{r echo=TRUE}
+subset(all, Gene == "yaaJ")
+```
+
+DISTANCE BETWEEN EACH BS AND EACH TSS  
+
+  - Una columna para cada BS  
+  - Una fila para cada TSS  
+  
+```{r echo=TRUE}
+TSS_BS.dist.repressed[['yaaJ']]
+```
+
+*80% of the repressor BS's are at a distance between -149.5 and +69.5*  
+
+CONCLUSION:  
+THE SECOND TSS HAS A BETTER CHANCE TO BE FUNCTIONAL THAN ALL THE OTHERS  
+THE SECOND TSS COULD BE RELATED TO THE ONLY BINDING SITE REPORTED
+
+
+##### Filter BS-TSS interactions
+
+*Repressed genes*  
+
+Number of ALL TSS-BS interactions
+```{r echo=TRUE}
+sapply(TSS_BS.dist.repressed, function(x){length(as.vector(x))}, simplify=T)
+
+sum(sapply(TSS_BS.dist.repressed, function(x){length(as.vector(x))}, simplify=T))
+```
+
+Number of possible TSS-BS interactions (AFTER FILTERING)  
+
+```{r echo=TRUE}
+pass.repressor <- lapply(TSS_BS.dist.repressed, function(x, min, max){ x[x>min & x<max]}, min = -250 , max = 50 )
+
+
+#pass.repressor <- lapply(TSS_BS.dist.repressed, function(x, min, max){ x[x>min & x<max]}, min = -200 , max = 10 )
+no.repressor <- sapply(pass.repressor, length, simplify=T)
+no.repressor
+
+sum(no.repressor)
+```
+
+*Activated genes*  
+
+Number of ALL TSS-BS interactions
+```{r echo=TRUE}
+sapply(TSS_BS.dist.activated, function(x){length(as.vector(x))}, simplify=T)
+
+sum(sapply(TSS_BS.dist.activated, function(x){length(as.vector(x))}, simplify=T))
+```
+
+Number of possible TSS-BS interactions (AFTER FILTERING)  
+
+```{r echo=TRUE}
+pass.activated <- lapply(TSS_BS.dist.activated, function(x, min, max){ x[x>min & x<max]}, min = -250 , max = -50 )
+
+#pass.activated <- lapply(TSS_BS.dist.activated, function(x, min, max){ x[x>min & x<max]}, min = -460 , max = -40 )
+no.activated <- sapply(pass.activated, length, simplify=T)
+no.activated
+```
+
