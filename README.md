@@ -1,5 +1,7 @@
 # BS-TSS
 
+This program finds BS-TSS interactions that are in a regulatory neighborhood, and that could have a biological function associated.
+
 ## DESCRIPTION
 
 ### INPUT
